@@ -1,28 +1,13 @@
 
-
-/* 
-Funciones:
-- sendTaskToLS() que envíe una tarea al LS y luego retorne las tareas y las envíe a structure()
-- structure(valueTask, stateChk) que contenga la estructura de una tarea
-*/
-
-
-//window.onload = getElementFromLocalStorage();
-
-getElementFromLocalStorage();
-
 let arrayTask = [];
-
-//var i = 0;
-//var id = "id"+i;
-
+getElementFromLocalStorage();
 
 async function sendTaskToLS(){
 
   var valueGeolocation = await getPosition();
   var valueTask = document.getElementById("writeTask").value;
   var valueCheck = "false";
-  //var objectTask = new captureTask(id="id"+i, task, valueCheck, geolocation, i);
+  
   const objectTask = {
     id: Date.now(),
     task: valueTask,
@@ -34,10 +19,7 @@ async function sendTaskToLS(){
 
   window['localStorage'].setItem('Task', JSON.stringify(arrayTask));
 
-  //structure(id="id"+i, task, valueCheck);
   structure(objectTask.id, objectTask.task, objectTask.state);
-
-  //i++;
 
 }
 
@@ -55,7 +37,8 @@ function structure(id, task, valueCheck){
 
   var btnClipboard = "<button type='button' id='btnClipboard' onclick='copyTask(this)'><img id='imgClipboard' src='icons/clipboard.svg'></button>";
   var btnShare = "<button type='button' id='btnShare' onclick='shareTask(this)'><img id='imgShare' src='icons/share.svg'></button>";
-  var btnDelete = "<button type='button' id='btnDelete id"+id+"' onclick='deleteTask(this)'><img id='imgDelete' src='icons/delete.svg'></button>";
+  //var btnDelete = "<button type='button' id='btnDelete id"+id+"' onclick='deleteTask(this)'><img id='imgDelete' src='icons/delete.svg'></button>";
+  var btnDelete = "<button type='button' id='"+id+"' onclick='deleteTask(this)'><img id='imgDelete' src='icons/delete.svg'></button>";
   var spanTask = "<span id='spanTask' value='"+task+"'>"+task+"</span>";
   li.innerHTML = "<div id='spanTask'>"+checkbox + spanTask + btnClipboard + btnShare + btnDelete+"</div>";
   innerTask = "<div id='spanTask'>"+checkbox + spanTask + btnClipboard + btnShare + btnDelete+"</div>";
@@ -70,7 +53,7 @@ function getElementFromLocalStorage(){
 
       console.log("Hay elementos en LocalStorage");
       var taskFromLS = JSON.parse(window['localStorage'].getItem('Task')) || [];
-
+      arrayTask = taskFromLS;
       taskFromLS.forEach(tasks => {
         structure(tasks.id, tasks.task, tasks.state); 
       });
@@ -80,7 +63,6 @@ function getElementFromLocalStorage(){
   }
 
 }
-
 
 const getPosition = async () => {
   if ('geolocation' in navigator) {
@@ -101,28 +83,29 @@ const getPosition = async () => {
   }
 };
 
-
 function eventCkeckbox(checkBox){
   var taskFromLS = JSON.parse(window['localStorage'].getItem('Task'));
-  
-  
 
   taskFromLS.forEach(tasks => {
-    console.log("el id de la tarea es: "+tasks.id);
-    console.log("la class del check es: "+checkBox.id);
     if(String(tasks.id) == checkBox.id){
       console.log("Ingrese al if del eventCkeckbox");
       tasks.state = checkBox.checked;
-
     }
   });
   localStorage.setItem('Task', JSON.stringify(taskFromLS));
   
-  
 }
 
 function deleteTask(getTask){
-    getTask.closest("li").remove();
+  //elimino la tarea en el html
+  var taskFromLS = JSON.parse(window['localStorage'].getItem('Task'));
+  getTask.closest("li").remove();
+
+  //elimino la tarea en el LS
+  let elementToDelete = taskFromLS.findIndex(task => task.id === getTask.id);
+  taskFromLS.splice(elementToDelete, 1);
+  let taskFromLSSTRING = JSON.stringify(taskFromLS);
+  window['localStorage'].setItem("Task", taskFromLSSTRING); 
 }
 
 function copyTask(element){
